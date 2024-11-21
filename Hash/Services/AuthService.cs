@@ -58,7 +58,8 @@ namespace Hash.Services
             {
                 Username = request.Username,
                 Email = request.Email,
-                Password = HashPassword(request.Password)
+                Password = HashPassword(request.Password),
+                Role = request.IsAdmin ? UserRoles.Admin : UserRoles.User
             };
 
             _context.Users.Add(user);
@@ -78,7 +79,8 @@ namespace Hash.Services
                 {
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
                 SigningCredentials = new SigningCredentials(

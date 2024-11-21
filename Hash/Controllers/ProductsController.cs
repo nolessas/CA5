@@ -17,8 +17,8 @@ namespace Hash.Controllers
             _context = context;
         }
 
-        [AllowAnonymous]
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             return await _context.Products.ToListAsync();
@@ -38,8 +38,8 @@ namespace Hash.Controllers
             return product;
         }
 
-        [Authorize]
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
             if (!ModelState.IsValid)

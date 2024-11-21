@@ -18,5 +18,7 @@ namespace Hash.Models
         [Required]
         [StringLength(100)]
         public string Password { get; set; }
+
+        public string Role { get; set; } = "User";
     }
 } 

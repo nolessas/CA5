@@ -1,6 +1,9 @@
 using Hash.Models;
+using Hash.Models.DTOs;
+using Hash.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Hash.Data
 {
@@ -9,7 +12,7 @@ namespace Hash.Data
         public static async Task SeedData(ApplicationDbContext context, IConfiguration configuration)
         {
             await SeedProducts(context, configuration);
-            await SeedUsers(context, configuration);
+            await SeedInitialUsers(context);
         }
 
         private static async Task SeedProducts(ApplicationDbContext context, IConfiguration configuration)
@@ -25,17 +28,38 @@ namespace Hash.Data
             }
         }
 
-        private static async Task SeedUsers(ApplicationDbContext context, IConfiguration configuration)
+        private static async Task SeedInitialUsers(ApplicationDbContext context)
         {
             if (!context.Users.Any())
             {
-                var seedData = configuration.GetSection("SeedData:Users").Get<List<User>>();
-                if (seedData != null)
+                // Create admin user
+                var adminUser = new User
                 {
-                    await context.Users.AddRangeAsync(seedData);
-                    await context.SaveChangesAsync();
-                }
+                    Username = "admin",
+                    Email = "admin@hash.com",
+                    Password = HashPassword("Admin123!"),
+                    Role = UserRoles.Admin
+                };
+
+                // Create regular user
+                var regularUser = new User
+                {
+                    Username = "user1",
+                    Email = "user1@hash.com",
+                    Password = HashPassword("User123!"),
+                    Role = UserRoles.User
+                };
+
+                await context.Users.AddRangeAsync(adminUser, regularUser);
+                await context.SaveChangesAsync();
             }
+        }
+
+        private static string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
         }
     }
 } 
