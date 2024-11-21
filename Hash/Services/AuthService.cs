@@ -59,7 +59,7 @@ namespace Hash.Services
                 Username = request.Username,
                 Email = request.Email,
                 Password = HashPassword(request.Password),
-                Role = request.IsAdmin ? UserRoles.Admin : UserRoles.User
+                Role = UserRoles.User
             };
 
             _context.Users.Add(user);
